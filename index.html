@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shield Social Beta</title>
+    <style>
+        body { font-family: sans-serif; background: #121212; color: white; margin: 0; padding: 20px; display: flex; flex-direction: column; height: 100vh; box-sizing: border-box; }
+        #chat { flex: 1; overflow-y: auto; border: 1px solid #333; padding: 15px; border-radius: 12px; margin-bottom: 15px; background: #1a1a1a; display: flex; flex-direction: column; }
+        .msg { background: #2c2c2c; padding: 10px; margin-bottom: 10px; border-radius: 8px; border-left: 4px solid #0088cc; animation: slideIn 0.2s ease; }
+        @keyframes slideIn { from { transform: translateX(-10px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+        .msg b { color: #0088cc; display: block; font-size: 0.9em; }
+        .inputs { display: flex; flex-direction: column; gap: 10px; }
+        input { background: #2c2c2c; border: 1px solid #444; color: white; padding: 12px; border-radius: 8px; outline: none; }
+        button { background: #0088cc; color: white; border: none; padding: 15px; border-radius: 8px; font-weight: bold; cursor: pointer; }
+        button:active { background: #005f8d; }
+    </style>
+</head>
+<body>
+
+    <h2>Shield Beta 🛡️</h2>
+    <div id="chat"></div>
+
+    <div class="inputs">
+        <input type="text" id="username" placeholder="Твой ник">
+        <input type="text" id="message" placeholder="Что нового?">
+        <button onclick="send()">Опубликовать</button>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://gstatic.com";
+        import { getDatabase, ref, push, onChildAdded } from "https://gstatic.com";
+
+        const firebaseConfig = {
+          apiKey: "AIzaSyCDLluPhhXrjNNIfIwXIksZTxHFCzaPtv8",
+          authDomain: "://firebaseapp.com",
+          projectId: "shield-38919",
+          storageBucket: "shield-38919.firebasestorage.app",
+          messagingSenderId: "57065821267",
+          appId: "1:57065821267:web:d1c4b690738eb72ff362a6",
+          measurementId: "G-1N1X6J6TFL",
+          databaseURL: "https://shield-38919-default-rtdb.firebaseio.com/"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+
+        window.send = function() {
+            const user = document.getElementById('username').value || "Аноним";
+            const text = document.getElementById('message').value;
+            if (text.trim() !== "") {
+                push(ref(db, 'posts'), { user, text, time: Date.now() });
+                document.getElementById('message').value = "";
+            }
+        }
+
+        const chat = document.getElementById('chat');
+        onChildAdded(ref(db, 'posts'), (data) => {
+            const msg = data.val();
+            const div = document.createElement('div');
+            div.className = 'msg';
+            div.innerHTML = `<b>@${msg.user}</b>${msg.text}`;
+            chat.appendChild(div);
+            chat.scrollTop = chat.scrollHeight;
+        });
+    </script>
+</body>
+</html>
